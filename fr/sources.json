@@ -1,0 +1,25 @@
+{
+  "language_codes": ["fr", "fra", "fre", "french"],
+  "sources": [
+    {
+      "id": "inpn_v18",
+      "enabled": true,
+      "type": "inpn_taxref",
+      "archive": "zip",
+      "url": "https://geonature.fr/data/inpn/taxonomie/TAXREF_v18_2025.zip",
+      "file": "sources/downloads/TAXREF_v18_2025.zip",
+      "version": "18.0",
+      "vernacular_language_codes": ["fra", "fre"]
+    },
+    {
+      "id": "inpn_v11",
+      "enabled": true,
+      "type": "inpn_taxref",
+      "archive": "zip",
+      "url": "https://geonature.fr/data/inpn/taxonomie/TAXREF_INPN_v11.zip",
+      "file": "sources/downloads/TAXREF_INPN_v11.zip",
+      "version": "11.0",
+      "vernacular_language_codes": ["fra", "fre"]
+    }
+  ]
+}
