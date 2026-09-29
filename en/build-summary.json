@@ -1,0 +1,28 @@
+{
+  "language": "en",
+  "source_records": 1322492,
+  "source_records_by_source": {
+    "col_2026-08-26": 375996,
+    "gbif_2023-08-28": 488172,
+    "inat_2026-09-01": 310696,
+    "ncbi_taxdump_2026-09-28": 13850,
+    "wikidata_2026-09-29": 133778
+  },
+  "matched_source_records": 1096505,
+  "matched_source_records_by_source": {
+    "col_2026-08-26": 296931,
+    "gbif_2023-08-28": 422999,
+    "inat_2026-09-01": 244890,
+    "ncbi_taxdump_2026-09-28": 13850,
+    "wikidata_2026-09-29": 117835
+  },
+  "unique_taxid_name_pairs": 424657,
+  "unmatched_records": 229428,
+  "unmatched_records_by_source": {
+    "col_2026-08-26": 80176,
+    "gbif_2023-08-28": 66065,
+    "inat_2026-09-01": 66750,
+    "wikidata_2026-09-29": 16437
+  },
+  "backend_tsv": "TAXONOMIC-VERNACULAR-EN-LATEST.txt"
+}
