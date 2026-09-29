@@ -10,13 +10,15 @@ This directory contains language-independent source retrieval and matching tools
 - Optional source archives are downloaded under `<language>/sources/downloads/`; they are local build inputs and are excluded from Git. The configuration in `sources.json` is tracked.
 - `<language>/README.md` documents that language's sources and files; each build refreshes its generated summary section while preserving hand-written notes.
 - `<language>/TAXONOMIC-VERNACULAR-<LANG>-LATEST.txt` is the output: NCBI taxid, NCBI scientific name, vernacular name, and contributing source IDs (tab-separated, one name per row). Source IDs identify the source snapshot/version (for example `gbif_YYYY-MM-DD`, `col_YYYY-MM-DD`, `inat_YYYY-MM-DD`, `wikidata_YYYY-MM-DD`, or `inpn_v11`/`inpn_v18`) and are comma-separated when multiple sources supplied the same taxid/name pair.
-- The build writes `unmatched.tsv`, listing source rows that could not be linked to an NCBI taxid. This report is tracked in Git.
+- The build writes `unmatched.tsv`, listing source rows that could not be linked to an NCBI taxid. It is useful for local review and is excluded from Git.
 
-## What to keep in Git
+## Files tracked in Git
 
-Track the scripts, this README, each language's `README.md`, `sources.json`, `build-summary.json`, `unmatched.tsv`, and the final `TAXONOMIC-VERNACULAR-<LANG>-LATEST.txt` output. The final files are the deliverables needed by Lifemap and preserve the source snapshot IDs used for each name.
+Track the scripts, this README, and for each language its `README.md`, `sources.json`, `build-summary.json`, and final `TAXONOMIC-VERNACULAR-<LANG>-LATEST.txt` output. The final files are the deliverables needed by Lifemap and preserve the source snapshot IDs used for each name.
 
-Keep shared downloads and extracted datasets, language-specific downloads, Wikidata extracts, and comparison reports out of Git. These are inputs or local analysis files; the download and build commands can recreate the inputs. `.gitignore` is set up for this split.
+## Local files excluded from Git
+
+Shared downloads and extracted datasets, language-specific Wikidata extracts, archives under `sources/downloads/`, `unmatched.tsv`, and comparison reports stay on the local machine. The downloads are build inputs; `unmatched.tsv` is a diagnostic report. The download and build commands can recreate them. `.gitignore` records these exclusions.
 
 The tools use only the Python standard library.
 

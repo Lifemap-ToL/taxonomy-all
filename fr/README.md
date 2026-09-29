@@ -50,12 +50,16 @@ The build read **834 970 French-language source records** and wrote **141 08
 
 `Input records` are vernacular-name rows read from a source. `NCBI taxid links` count successful source-record-to-NCBI-taxid associations; one source record can link to multiple NCBI taxids. `Unmatched records` are source rows for which the build found no usable NCBI taxid. These columns are not mutually exclusive, so their totals need not add up to the number of input records.
 
-### Files in this language folder
+### Files tracked in Git
 
 - `TAXONOMIC-VERNACULAR-FR-LATEST.txt` — backend TSV with four tab-separated columns and no header: NCBI taxid, current NCBI scientific name, vernacular name, and contributing source IDs.
-- `unmatched.tsv` — source records that could not be assigned a usable NCBI taxid, with the reason; this report is tracked in Git.
 - `build-summary.json` — machine-readable version of the counts above.
-- `wikidata.tsv` — language-specific input created by `download-wikidata fr`; it is generated locally and excluded from Git.
-- `sources.json` — optional language-specific source configuration, tracked in Git. Configured archives are downloaded to `sources/downloads/` and excluded from Git.
+- `sources.json` — optional language-specific source configuration.
 - `README.md` — this generated section is refreshed by each build; hand-written notes outside this section are preserved.
+
+### Local files excluded from Git
+
+- `unmatched.tsv` — source records that could not be assigned a usable NCBI taxid, with the reason; available locally for review after a build.
+- `wikidata.tsv` — language-specific input created by `download-wikidata fr` before the build.
+- `sources/downloads/` — configured language-specific source archives retrieved by `download-language-sources`.
 <!-- END AUTO-GENERATED BUILD SUMMARY -->
