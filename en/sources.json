@@ -1,5 +1,6 @@
 {
   "language_codes": ["en", "eng", "english"],
+  "excluded_shared_sources": ["gbif"],
   "sources": [
     {
       "id": "ncbi_taxdump",

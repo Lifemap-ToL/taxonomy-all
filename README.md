@@ -8,7 +8,7 @@ It combines global and language-specific sources to attach vernacular names to N
 
 **Shared sources:** NCBI Taxonomy provides the target taxids, scientific names, synonyms, and merged taxids. GBIF Backbone, Catalogue of Life Extended Release, and iNaturalist provide global vernacular names. Wikidata is queried separately for each language and can provide vernacular names, scientific names, and direct NCBI taxids.
 
-**Language-specific sources:** A language can add a useful regional or national source in its `sources.json`. English enables NCBI taxdump's `common name` entries as a language-specific source; French uses INPN TAXREF v18 and retains v11 because it contains vernacular names missing from newer versions. Other languages can use only the shared sources or configure additional sources.
+**Language-specific sources:** A language can add a useful regional or national source in its `sources.json`. English enables NCBI taxdump's `common name` entries and excludes GBIF because its Backbone snapshot contains French names tagged as English; French uses INPN TAXREF v18 and retains v11 because it contains vernacular names missing from newer versions. Other languages can use only the shared sources or configure additional sources.
 
 **Matching:** Source scientific names are matched against NCBI scientific names and synonyms after case and whitespace normalization. Every matching NCBI taxid is retained, including multiple taxids for one scientific name. Wikidata's direct NCBI taxid adds a link when the name match did not already provide that link. Duplicate taxid/name pairs are combined, with their source IDs recorded in the output. Names without an NCBI match are reported locally in `unmatched.tsv`.
 

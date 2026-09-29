@@ -370,6 +370,14 @@ def _language_aliases(lang_dir: Path) -> set[str]:
     return {str(alias).strip().casefold() for alias in config.get("language_codes", []) if str(alias).strip()}
 
 
+def _excluded_shared_sources(lang_dir: Path) -> set[str]:
+    config_path = lang_dir / "sources.json"
+    if not config_path.exists():
+        return set()
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    return {str(source).strip().casefold() for source in config.get("excluded_shared_sources", []) if str(source).strip()}
+
+
 def _write_tsv(path: Path, header: list[str], rows: Iterable[Iterable[str]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as output:
         writer = csv.writer(output, delimiter="\t", lineterminator="\n")
@@ -456,16 +464,18 @@ def _update_language_readme(lang_dir: Path, summary: dict[str, object]) -> None:
 def build_language(language: str) -> None:
     code = language.strip().lower()
     lang_dir = language_dir(code)
+    excluded_shared_sources = _excluded_shared_sources(lang_dir)
     shared_ncbi = EXTRACTED / "ncbi"
     wikidata_file = lang_dir / "wikidata.tsv"
     required = [
         shared_ncbi / "names.dmp",
         shared_ncbi / "nodes.dmp",
-        GBIF_ARCHIVE,
         COL_ARCHIVE,
         INAT_ARCHIVE,
         wikidata_file,
     ]
+    if "gbif" not in excluded_shared_sources:
+        required.append(GBIF_ARCHIVE)
     missing = [str(path) for path in required if not path.exists()]
     if missing:
         raise FileNotFoundError("Missing source files; download them first:\n  " + "\n  ".join(missing))
@@ -474,13 +484,15 @@ def build_language(language: str) -> None:
     print("Loading NCBI names and synonyms...")
     ncbi = NCBIIndex.load()
     print("Loading Wikidata vernacular names...")
-    gbif_source = _archive_source_label("gbif", GBIF_ARCHIVE)
     col_source = _archive_source_label("col", COL_ARCHIVE)
     inat_source = _archive_source_label("inat", INAT_ARCHIVE)
     wikidata_source = _wikidata_source_label(wikidata_file)
     language_aliases = _language_aliases(lang_dir)
-    print(f"Reading GBIF vernacular names for {code}...")
-    gbif_records = _gbif_records(GBIF_ARCHIVE, code, language_aliases, gbif_source)
+    gbif_records: list[VernacularRecord] = []
+    if "gbif" not in excluded_shared_sources:
+        gbif_source = _archive_source_label("gbif", GBIF_ARCHIVE)
+        print(f"Reading GBIF vernacular names for {code}...")
+        gbif_records = _gbif_records(GBIF_ARCHIVE, code, language_aliases, gbif_source)
     print(f"Reading Catalogue of Life vernacular names for {code}...")
     col_records = _col_records(COL_ARCHIVE, code, language_aliases, col_source)
     print(f"Reading iNaturalist vernacular names for {code}...")
