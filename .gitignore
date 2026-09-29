@@ -3,8 +3,6 @@ shared/extracted/
 */wikidata.tsv
 */wikidata-metadata.json
 */sources/downloads/
-*/matched-sources.tsv
-*/unmatched.tsv
 */comparison-old-latest.tsv
 __pycache__/
 *.py[cod]

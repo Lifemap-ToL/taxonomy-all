@@ -404,16 +404,15 @@ def _update_language_readme(lang_dir: Path, summary: dict[str, object]) -> None:
         "|---|---:|---:|---:|",
         *source_rows,
         "",
-        "`Input records` are vernacular-name rows read from a source. `NCBI taxid links` are successful source-record-to-NCBI-taxid associations written to `matched-sources.tsv`; one source record can produce links to multiple NCBI taxids. `Unmatched records` are source rows for which the build found no usable NCBI taxid. These columns are not mutually exclusive, so their totals need not add up to the number of input records.",
+        "`Input records` are vernacular-name rows read from a source. `NCBI taxid links` count successful source-record-to-NCBI-taxid associations; one source record can link to multiple NCBI taxids. `Unmatched records` are source rows for which the build found no usable NCBI taxid. These columns are not mutually exclusive, so their totals need not add up to the number of input records.",
         "",
         "### Files in this language folder",
         "",
         f"- `{output_file}` — backend TSV with four tab-separated columns and no header: NCBI taxid, current NCBI scientific name, vernacular name, and contributing source IDs.",
-        "- `matched-sources.tsv` — one row for each successful source-record-to-NCBI-taxid link, including source and scientific-name details.",
-        "- `unmatched.tsv` — source records that could not be assigned a usable NCBI taxid, with the reason.",
+        "- `unmatched.tsv` — source records that could not be assigned a usable NCBI taxid, with the reason; this report is tracked in Git.",
         "- `build-summary.json` — machine-readable version of the counts above.",
-        "- `wikidata.tsv` — language-specific Wikidata input used by the build; retrieved separately with `download-wikidata`.",
-        "- `sources.json` and `sources/downloads/` — optional language-specific source configuration and downloaded files, when configured.",
+        f"- `wikidata.tsv` — language-specific input created by `download-wikidata {language}`; it is generated locally and excluded from Git.",
+        "- `sources.json` — optional language-specific source configuration, tracked in Git. Configured archives are downloaded to `sources/downloads/` and excluded from Git.",
         "- `README.md` — this generated section is refreshed by each build; hand-written notes outside this section are preserved.",
         _README_END,
     ])
@@ -469,7 +468,8 @@ def build_language(language: str) -> None:
     records = [*gbif_records, *col_records, *inat_records, *wd_records, *language_records]
     print(f"Matching {len(records):,} source records to NCBI...")
 
-    matched: list[tuple[str, str, str, str, str, str, str]] = []
+    matched_link_count = 0
+    matched_links_by_source: Counter[str] = Counter()
     unmatched: list[tuple[str, str, str, str, str]] = []
     final_names: dict[tuple[str, str], str] = {}
     final_sources: dict[tuple[str, str], set[str]] = defaultdict(set)
@@ -484,15 +484,12 @@ def build_language(language: str) -> None:
 
         if candidates:
             for taxid in sorted(candidates):
-                if record.source.startswith("wikidata_") and taxid == id_candidate:
-                    method = "ncbi_name_and_wikidata_id" if taxid in name_candidates else "wikidata_ncbi_id"
-                else:
-                    method = "ncbi_exact_name_or_synonym"
                 canonical = ncbi.scientific.get(taxid)
                 if not canonical:
                     unmatched.append((record.source, record.source_id, record.scientific_name, record.name, "NCBI taxid is not present in names.dmp"))
                     continue
-                matched.append((taxid, canonical, record.name, record.source, record.source_id, record.scientific_name, method))
+                matched_link_count += 1
+                matched_links_by_source[record.source] += 1
                 key = (taxid, _norm(record.name))
                 final_sources[key].add(record.source)
                 current = final_names.get(key)
@@ -508,18 +505,13 @@ def build_language(language: str) -> None:
         for key, name in sorted(final_names.items()):
             taxid, _ = key
             writer.writerow((taxid, ncbi.scientific[taxid], name, ",".join(sorted(final_sources[key]))))
-    _write_tsv(
-        lang_dir / "matched-sources.tsv",
-        ["ncbi_taxid", "ncbi_scientific_name", "vernacular_name", "source", "source_taxon_id", "source_scientific_name", "match_method"],
-        sorted(matched),
-    )
     _write_tsv(lang_dir / "unmatched.tsv", ["source", "source_taxon_id", "source_scientific_name", "vernacular_name", "reason"], sorted(unmatched))
     summary = {
         "language": code,
         "source_records": len(records),
         "source_records_by_source": dict(sorted(Counter(record.source for record in records).items())),
-        "matched_source_records": len(matched),
-        "matched_source_records_by_source": dict(sorted(Counter(row[3] for row in matched).items())),
+        "matched_source_records": matched_link_count,
+        "matched_source_records_by_source": dict(sorted(matched_links_by_source.items())),
         "unique_taxid_name_pairs": len(final_names),
         "unmatched_records": len(unmatched),
         "unmatched_records_by_source": dict(sorted(Counter(row[0] for row in unmatched).items())),
