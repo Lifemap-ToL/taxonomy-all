@@ -2,29 +2,32 @@
 
 This directory contains language-independent source retrieval and matching tools, with language-specific inputs and outputs in folders such as `es/`, `fr/`, and `de/`.
 
-## Separation of responsibilities
+## What this repository does
 
-- `shared/downloads/` and `shared/extracted/` contain source files shared by every language. They are downloaded once and reused by all language builds.
-- `<language>/wikidata.tsv` is a language-specific Wikidata extract created by `download-wikidata <language>`; it is a local build input and is excluded from Git.
-- `<language>/sources.json` lists optional sources that apply only to that language.
-- Optional source archives are downloaded under `<language>/sources/downloads/`; they are local build inputs and are excluded from Git. The configuration in `sources.json` is tracked.
-- `<language>/README.md` documents that language's sources and files; each build refreshes its generated summary section while preserving hand-written notes.
-- `<language>/TAXONOMIC-VERNACULAR-<LANG>-LATEST.txt` is the output: NCBI taxid, NCBI scientific name, vernacular name, and contributing source IDs (tab-separated, one name per row). Source IDs identify the source snapshot/version (for example `gbif_YYYY-MM-DD`, `col_YYYY-MM-DD`, `inat_YYYY-MM-DD`, `wikidata_YYYY-MM-DD`, or `inpn_v11`/`inpn_v18`) and are comma-separated when multiple sources supplied the same taxid/name pair.
-- The build writes `unmatched.tsv`, listing source rows that could not be linked to an NCBI taxid. It is useful for local review and is excluded from Git.
+It combines global and language-specific sources to attach vernacular names to NCBI Taxonomy IDs.
 
-## Files tracked in Git
+**Shared sources:** NCBI Taxonomy provides the target taxids, scientific names, synonyms, and merged taxids. GBIF Backbone, Catalogue of Life Extended Release, and iNaturalist provide global vernacular names. Wikidata is queried separately for each language and can provide vernacular names, scientific names, and direct NCBI taxids.
 
-Track the scripts, this README, and for each language its `README.md`, `sources.json`, `build-summary.json`, and final `TAXONOMIC-VERNACULAR-<LANG>-LATEST.txt` output. The final files are the deliverables needed by Lifemap and preserve the source snapshot IDs used for each name.
+**Language-specific sources:** A language can add a useful regional or national source in its `sources.json`. French uses INPN TAXREF v18 and retains v11 because it contains vernacular names missing from newer versions. Other languages can use only the shared sources or configure additional sources.
 
-## Local files excluded from Git
+**Matching:** Source scientific names are matched against NCBI scientific names and synonyms after case and whitespace normalization. Every matching NCBI taxid is retained, including multiple taxids for one scientific name. Wikidata's direct NCBI taxid adds a link when the name match did not already provide that link. Duplicate taxid/name pairs are combined, with their source IDs recorded in the output. Names without an NCBI match are reported locally in `unmatched.tsv`.
 
-Shared downloads and extracted datasets, language-specific Wikidata extracts, archives under `sources/downloads/`, `unmatched.tsv`, and comparison reports stay on the local machine. The downloads are build inputs; `unmatched.tsv` is a diagnostic report. The download and build commands can recreate them. `.gitignore` records these exclusions.
+The final file for each language has four tab-separated columns: NCBI taxid, NCBI scientific name, vernacular name, and source IDs.
 
-The tools use only the Python standard library.
+## Usage
 
-## First Spanish build
+Run commands from this repository's directory. Shared data is downloaded once and reused for all languages.
 
-Run these separately from inside `taxonomy-all/` so source retrieval is decoupled from processing:
+| Command | What it does |
+|---|---|
+| `python -m taxonomy_all download-shared` | Downloads and prepares the shared NCBI, GBIF, Catalogue of Life, and iNaturalist data. |
+| `python -m taxonomy_all download-wikidata <language>` | Runs the Wikidata query for a language, for example `es`, and saves its input locally. |
+| `python -m taxonomy_all download-language-sources <language>` | Downloads optional sources configured for that language; for example, French INPN archives. |
+| `python -m taxonomy_all build <language>` | Builds the final vernacular TSV and build summary, refreshes that language's README, and writes a local unmatched report. |
+
+Existing downloads are reused. Add `--force` to a download command to replace its existing files.
+
+### Example: Spanish
 
 ```sh
 python -m taxonomy_all download-shared
@@ -32,11 +35,7 @@ python -m taxonomy_all download-wikidata es
 python -m taxonomy_all build es
 ```
 
-## Shared and language-specific sources
-
-Every language uses the same shared NCBI, GBIF, Catalogue of Life, and iNaturalist downloads. Some languages may also have a useful regional or national species source. Those sources belong to that language's folder and are listed in its `sources.json`; they are downloaded separately and added to the common build alongside the shared sources and Wikidata records.
-
-For example, French uses INPN TAXREF because it is a relevant French biodiversity source. The `fr/sources.json` entries configure TAXREF v18 and the older v11 archive as separate sources, including URLs, local paths, archive types, and French language codes. v11 is intentionally retained as a historical source because it contains vernacular names absent from newer releases; its names remain visibly attributed to `inpn_v11`. Run the French pipeline from inside `taxonomy-all/` with:
+### Example: French
 
 ```sh
 python -m taxonomy_all download-shared
@@ -45,43 +44,29 @@ python -m taxonomy_all download-language-sources fr
 python -m taxonomy_all build fr
 ```
 
-`download-language-sources fr` retrieves only the optional sources configured for French; it does not download the shared datasets. If a language has no optional sources configured, that command reports this and the build uses its regular sources. Downloading and processing are separate steps so the same shared archives can be reused for every language.
-
-To add an optional source for another language, put its configuration in that language's `sources.json`. If its file format is already supported, the configuration can select the existing adapter. A new format needs a source adapter under `taxonomy_all/sources/` and a corresponding source type in the build. This keeps the language-specific retrieval/parsing isolated while the shared NCBI matching and output logic remains common.
-
-`download-shared` downloads and extracts the NCBI `names.dmp`, `nodes.dmp`, and `merged.dmp`, and downloads the GBIF backbone, Catalogue of Life Extended Release Darwin Core Archive, and iNaturalist taxonomy Darwin Core Archive. These are global datasets reused across language builds. GBIF's backbone is about 926 MB compressed and Catalogue of Life's extended archive is about 654 MB; ensure there is enough disk space. GBIF's published `current` backbone archive was last updated in August 2023, so Catalogue of Life supplies a more recently updated global checklist and vernacular-name source. CoL's Extended Release is used to maximize coverage by integrating additional sources.
-
-Each downloader skips an existing non-empty file. Pass `--force` to replace source downloads. The source archives are snapshots: keep the original archives and note their download dates when preserving a reproducible release.
-
-Wikidata is extracted separately for each language via a saved SPARQL query. The result includes the vernacular name, scientific name, and any available NCBI taxid. Wikidata scientific names are matched to NCBI like other sources; a linked NCBI taxid adds an association only when it gives an additional taxid. GBIF and iNaturalist cross-references are not used to transfer names between sources. The public Wikidata Query Service may time out on broad queries; if it does, rerun the extraction later or split the query. Wikidata recommends dumps rather than WDQS for very large extracts.
-
-## Matching policy
-
-1. NCBI `names.dmp` is the target taxonomy. Scientific names and synonyms are indexed by taxid; `merged.dmp` redirects obsolete taxids.
-2. For every source record, match its scientific name exactly (case- and whitespace-normalized) against NCBI names. Keep the vernacular name for every matching taxid. No accepted-name fallback or GBIF/iNaturalist crosswalk is used.
-3. Wikidata also supplies NCBI taxids. Those add an association only when the same Wikidata item’s scientific-name match did not already supply that taxid.
-4. Records with no matching scientific name and no Wikidata NCBI taxid go to `unmatched.tsv`.
-5. Deduplicate only at the end by NCBI taxid and vernacular name (case-insensitive), combining source IDs for that pair. The same vernacular name can therefore appear under multiple taxids.
-
-The build records GBIF, Catalogue of Life, and iNaturalist archive publication/export dates from their metadata, the Wikidata query date, and explicit versions for configured regional sources such as INPN. Before publishing a generated file, review source coverage, unmatched records, and applicable source attribution/licensing.
-
-## Adding a language
-
-Use the same shared downloads and commands with another ISO 639-1 language code, for example:
-
-```sh
-python -m taxonomy_all download-wikidata de
-python -m taxonomy_all build de
-```
-
-The source language filters accept the configured two-letter code and any aliases listed in that language's `sources.json`. An additional language may use only the shared sources or add one or more optional sources in its own `sources.json`. Source formats not yet supported can be added as adapters under `taxonomy_all/sources/`.
+For another language, replace `es` or `fr` with its language code. If it needs an additional source, configure it in that language's `sources.json`.
 
 ## Sources
 
-- NCBI Taxonomy dump: <https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz>
-- GBIF Backbone Darwin Core Archive: <https://hosted-datasets.gbif.org/datasets/backbone/current/backbone.zip> (GBIF Backbone Taxonomy, DOI [10.15468/39omei](https://doi.org/10.15468/39omei), CC BY 4.0; the published `current` archive was last updated 2023-08-28)
-- Catalogue of Life latest monthly Extended Release Darwin Core Archive: <https://download.checklistbank.org/col/xr_latest_dwca.zip> (current and archived releases are available from [Catalogue of Life downloads](https://www.catalogueoflife.org/data/download); source names include language metadata and are matched by scientific name like other sources)
-- iNaturalist Taxonomy Darwin Core Archive: <https://www.inaturalist.org/taxa/inaturalist-taxonomy.dwca.zip> (updated monthly; see [iNaturalist datasets](https://www.inaturalist.org/pages/developers#datasets))
-- INPN TAXREF v18.0: <https://geonature.fr/data/inpn/taxonomie/TAXREF_v18_2025.zip> (the current TAXREF release is listed by [PatriNat](https://www.patrinat.fr/fr/page-temporaire-de-telechargement-des-referentiels-de-donnees-lies-linpn-7353); cite TAXREF and its open license as described on [TAXREF-Web](https://taxref.mnhn.fr/taxref-web/about))
-- INPN TAXREF v11.0 (historical archive): <https://geonature.fr/data/inpn/taxonomie/TAXREF_INPN_v11.zip>; retained for vernacular names that may no longer appear in newer releases.
-- Wikidata Query Service: <https://query.wikidata.org/sparql>; scientific names use Wikidata property P225 and direct NCBI taxids use property P685.
+- [NCBI Taxonomy dump](https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz) — target taxonomy and synonyms.
+- [GBIF Backbone](https://hosted-datasets.gbif.org/datasets/backbone/current/backbone.zip) — global taxonomy and vernacular names; the downloaded snapshot is dated 2023-08-28 and is distributed under [CC BY 4.0](https://doi.org/10.15468/39omei).
+- [Catalogue of Life Extended Release](https://download.checklistbank.org/col/xr_latest_dwca.zip) — global taxonomy and vernacular names, including names integrated from additional sources.
+- [iNaturalist taxonomy archive](https://www.inaturalist.org/taxa/inaturalist-taxonomy.dwca.zip) — taxonomy and vernacular names.
+- [Wikidata Query Service](https://query.wikidata.org/sparql) — scientific names (P225), vernacular names, and NCBI taxids (P685).
+- [INPN TAXREF v18](https://geonature.fr/data/inpn/taxonomie/TAXREF_v18_2025.zip) and [v11 archive](https://geonature.fr/data/inpn/taxonomie/TAXREF_INPN_v11.zip) — French taxonomic and vernacular names. See [TAXREF terms and attribution](https://taxref.mnhn.fr/taxref-web/about).
+
+## License and attribution
+
+There is no `LICENSE` file, so no reuse license has been selected for the code. The combined data also has no single license declared here: each source dataset keeps its provider's terms. See the links above for source-specific licensing and attribution. Source IDs help identify provenance but do not replace provider attribution requirements.
+
+## Repository contents
+
+Each language folder contains its final output, source configuration, build summary, and language README. The README in each language folder is refreshed by its build.
+
+### Tracked in Git
+
+The repository tracks the scripts, documentation, language source configurations and summaries, and final language TSVs.
+
+### Local build files
+
+Source downloads, language-specific Wikidata extracts, and `unmatched.tsv` are generated or downloaded locally and excluded from Git. They can be recreated with the commands above.
