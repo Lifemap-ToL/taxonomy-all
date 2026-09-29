@@ -85,6 +85,15 @@ def download_language_sources(language: str, force: bool = False) -> None:
         if not source.get("enabled", True):
             continue
         source_id = source["id"]
+        if source.get("type") == "ncbi_names":
+            ncbi_names = EXTRACTED / "ncbi" / "names.dmp"
+            if not ncbi_names.exists():
+                raise FileNotFoundError(
+                    f"Shared NCBI names file is missing: {ncbi_names}. "
+                    "Run `python -m taxonomy_all download-shared` first."
+                )
+            print(f"Using shared NCBI names for {source_id}: {ncbi_names}")
+            continue
         destination = lang_dir / source["file"]
         _download(source["url"], destination, force)
         if source.get("archive", "").casefold() == "zip":

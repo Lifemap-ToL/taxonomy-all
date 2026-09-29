@@ -1,0 +1,11 @@
+{
+  "language_codes": ["en", "eng", "english"],
+  "sources": [
+    {
+      "id": "ncbi_taxdump",
+      "enabled": true,
+      "type": "ncbi_names",
+      "name_classes": ["common name"]
+    }
+  ]
+}

@@ -324,14 +324,32 @@ def _language_specific_records(language: str, lang_dir: Path) -> list[Vernacular
     for source in config.get("sources", []):
         if not source.get("enabled", True):
             continue
-        source_path = lang_dir / source["file"]
-        if not source_path.exists():
-            raise FileNotFoundError(
-                f"Configured source {source['id']!r} is missing: {source_path}. "
-                f"Run `python -m taxonomy_all download-language-sources {language}` first."
-            )
         source_type = source["type"]
-        if source_type == "inpn_taxref":
+        if source_type == "ncbi_names":
+            source_path = EXTRACTED / "ncbi" / "names.dmp"
+            if not source_path.exists():
+                raise FileNotFoundError(
+                    f"Shared NCBI names file is missing: {source_path}. "
+                    "Run `python -m taxonomy_all download-shared` first."
+                )
+            from .sources.ncbi_names import read_ncbi_names
+
+            snapshot_path = DOWNLOADS / "ncbi" / "taxdump.tar.gz"
+            if not snapshot_path.exists():
+                snapshot_path = source_path
+            source_label = f"{source['id']}_{datetime.fromtimestamp(snapshot_path.stat().st_mtime).date().isoformat()}"
+            records.extend(read_ncbi_names(
+                source_path,
+                source.get("name_classes", ["common name"]),
+                source_label=source_label,
+            ))
+        elif source_type == "inpn_taxref":
+            source_path = lang_dir / source["file"]
+            if not source_path.exists():
+                raise FileNotFoundError(
+                    f"Configured source {source['id']!r} is missing: {source_path}. "
+                    f"Run `python -m taxonomy_all download-language-sources {language}` first."
+                )
             from .sources.inpn import read_taxref_vernaculars
 
             records.extend(read_taxref_vernaculars(
@@ -365,7 +383,7 @@ _README_END = "<!-- END AUTO-GENERATED BUILD SUMMARY -->"
 
 def _update_language_readme(lang_dir: Path, summary: dict[str, object]) -> None:
     language = str(summary.get("language", lang_dir.name))
-    language_name = {"fr": "French", "es": "Spanish"}.get(language, language.upper())
+    language_name = {"en": "English", "fr": "French", "es": "Spanish"}.get(language, language.upper())
     output_file = str(summary["backend_tsv"])
     source_records = summary.get("source_records_by_source", {})
     matched_links = summary.get("matched_source_records_by_source", {})
@@ -481,7 +499,7 @@ def build_language(language: str) -> None:
         if not record.name:
             continue
         name_candidates = ncbi.resolve(record.scientific_name) if record.scientific_name else set()
-        id_candidate = ncbi.current_taxid(record.direct_ncbi) if record.source.startswith("wikidata_") and record.direct_ncbi else ""
+        id_candidate = ncbi.current_taxid(record.direct_ncbi) if record.direct_ncbi else ""
         candidates = set(name_candidates)
         if id_candidate in ncbi.scientific:
             candidates.add(id_candidate)
