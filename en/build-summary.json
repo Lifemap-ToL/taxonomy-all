@@ -14,7 +14,7 @@
     "ncbi_taxdump_2026-09-28": 13850,
     "wikidata_2026-09-29": 117835
   },
-  "unique_taxid_name_pairs": 377265,
+  "unique_taxid_name_pairs": 355697,
   "unmatched_records": 163363,
   "unmatched_records_by_source": {
     "col_2026-08-26": 80176,

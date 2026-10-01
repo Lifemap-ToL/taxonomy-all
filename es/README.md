@@ -11,7 +11,7 @@ Regional Spanish-language sources can be added to this language pipeline later w
 
 Build command: `python -m taxonomy_all build es`.
 
-The build read **267 080 Spanish-language source records** and wrote **110 147 unique NCBI taxid/vernacular-name pairs** to `TAXONOMIC-VERNACULAR-ES-LATEST.txt`.
+The build read **267 080 Spanish-language source records** and wrote **109 466 unique NCBI taxid/vernacular-name pairs** to `TAXONOMIC-VERNACULAR-ES-LATEST.txt`.
 
 | Source snapshot | Input records | NCBI taxid links | Unmatched records |
 |---|---:|---:|---:|

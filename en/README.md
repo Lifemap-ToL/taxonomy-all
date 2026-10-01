@@ -9,7 +9,7 @@ NCBI's dump does not provide a language tag for each common name. This source us
 
 Build command: `python -m taxonomy_all build en`.
 
-The build read **834 320 English-language source records** and wrote **377 265 unique NCBI taxid/vernacular-name pairs** to `TAXONOMIC-VERNACULAR-EN-LATEST.txt`.
+The build read **834 320 English-language source records** and wrote **355 697 unique NCBI taxid/vernacular-name pairs** to `TAXONOMIC-VERNACULAR-EN-LATEST.txt`.
 
 | Source snapshot | Input records | NCBI taxid links | Unmatched records |
 |---|---:|---:|---:|

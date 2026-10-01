@@ -26,6 +26,15 @@ def _norm(value: str) -> str:
     return " ".join(value.split()).casefold()
 
 
+def _vernacular_key(value: str) -> str:
+    return "".join(value.casefold().replace("-", "").split())
+
+
+def _capitalization_score(value: str) -> int:
+    words = value.replace("-", " ").split()
+    return sum(1 for word in words if word[0].isupper() and word[1:].islower())
+
+
 def _header_map(fieldnames: list[str] | None) -> dict[str, str]:
     headers: dict[str, str] = {}
     for name in fieldnames or []:
@@ -505,8 +514,7 @@ def build_language(language: str) -> None:
     matched_link_count = 0
     matched_links_by_source: Counter[str] = Counter()
     unmatched: list[tuple[str, str, str, str, str]] = []
-    final_names: dict[tuple[str, str], str] = {}
-    final_sources: dict[tuple[str, str], set[str]] = defaultdict(set)
+    final_variants: dict[tuple[str, str], dict[str, set[str]]] = defaultdict(dict)
     for record in records:
         if not record.name:
             continue
@@ -524,16 +532,28 @@ def build_language(language: str) -> None:
                     continue
                 matched_link_count += 1
                 matched_links_by_source[record.source] += 1
-                key = (taxid, _norm(record.name))
-                final_sources[key].add(record.source)
-                current = final_names.get(key)
-                if current is None or sum(char.isupper() for char in record.name) > sum(char.isupper() for char in current):
-                    final_names[key] = record.name
+                key = (taxid, _vernacular_key(record.name))
+                if record.name not in final_variants[key]:
+                    final_variants[key][record.name] = set()
+                final_variants[key][record.name].add(record.source)
         else:
             unmatched.append((record.source, record.source_id, record.scientific_name, record.name, "no exact NCBI scientific-name or synonym match"))
 
     output_code = code.upper()
     output_file = lang_dir / f"TAXONOMIC-VERNACULAR-{output_code}-LATEST.txt"
+    final_names: dict[tuple[str, str], str] = {}
+    final_sources: dict[tuple[str, str], set[str]] = {}
+    for key, variants in final_variants.items():
+        chosen_name = ""
+        chosen_score = (-1, -1, -1)
+        for name, sources in variants.items():
+            score = (len(name), name.count(" "), _capitalization_score(name))
+            if score > chosen_score:
+                chosen_name = name
+                chosen_score = score
+                final_sources[key] = sources
+        final_names[key] = chosen_name
+
     with output_file.open("w", encoding="utf-8", newline="") as output:
         writer = csv.writer(output, delimiter="\t", lineterminator="\n")
         for key, name in sorted(final_names.items()):

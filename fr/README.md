@@ -36,7 +36,7 @@ TAXREF v18.0 is listed as the current version on the PatriNat temporary download
 
 Build command: `python -m taxonomy_all build fr`.
 
-The build read **834 970 French-language source records** and wrote **141 088 unique NCBI taxid/vernacular-name pairs** to `TAXONOMIC-VERNACULAR-FR-LATEST.txt`.
+The build read **834 970 French-language source records** and wrote **139 968 unique NCBI taxid/vernacular-name pairs** to `TAXONOMIC-VERNACULAR-FR-LATEST.txt`.
 
 | Source snapshot | Input records | NCBI taxid links | Unmatched records |
 |---|---:|---:|---:|

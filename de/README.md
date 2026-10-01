@@ -1,9 +1,11 @@
+
+
 <!-- BEGIN AUTO-GENERATED BUILD SUMMARY -->
 ## Latest build summary (generated)
 
 Build command: `python -m taxonomy_all build de`.
 
-The build read **248 753 DE-language source records** and wrote **103 710 unique NCBI taxid/vernacular-name pairs** to `TAXONOMIC-VERNACULAR-DE-LATEST.txt`.
+The build read **248 753 DE-language source records** and wrote **97 531 unique NCBI taxid/vernacular-name pairs** to `TAXONOMIC-VERNACULAR-DE-LATEST.txt`.
 
 | Source snapshot | Input records | NCBI taxid links | Unmatched records |
 |---|---:|---:|---:|
