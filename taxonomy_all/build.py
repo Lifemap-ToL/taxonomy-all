@@ -400,7 +400,7 @@ _README_END = "<!-- END AUTO-GENERATED BUILD SUMMARY -->"
 
 def _update_language_readme(lang_dir: Path, summary: dict[str, object]) -> None:
     language = str(summary.get("language", lang_dir.name))
-    language_name = {"en": "English", "fr": "French", "es": "Spanish"}.get(language, language.upper())
+    language_name = {"en": "English", "fr": "French", "es": "Spanish", "el": "Greek"}.get(language, language.upper())
     output_file = str(summary["backend_tsv"])
     source_records = summary.get("source_records_by_source", {})
     matched_links = summary.get("matched_source_records_by_source", {})

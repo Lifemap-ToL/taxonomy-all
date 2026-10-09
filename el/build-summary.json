@@ -1,0 +1,26 @@
+{
+  "language": "el",
+  "source_records": 14149,
+  "source_records_by_source": {
+    "col_2026-08-26": 5493,
+    "gbif_2023-08-28": 2809,
+    "inat_2026-09-01": 5542,
+    "wikidata_2026-10-09": 305
+  },
+  "matched_source_records": 13486,
+  "matched_source_records_by_source": {
+    "col_2026-08-26": 5061,
+    "gbif_2023-08-28": 2742,
+    "inat_2026-09-01": 5376,
+    "wikidata_2026-10-09": 307
+  },
+  "unique_taxid_name_pairs": 8594,
+  "unmatched_records": 824,
+  "unmatched_records_by_source": {
+    "col_2026-08-26": 492,
+    "gbif_2023-08-28": 67,
+    "inat_2026-09-01": 250,
+    "wikidata_2026-10-09": 15
+  },
+  "backend_tsv": "TAXONOMIC-VERNACULAR-EL-LATEST.txt"
+}

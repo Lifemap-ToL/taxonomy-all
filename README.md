@@ -1,6 +1,6 @@
 # Lifemap multilingual vernacular taxonomy
 
-This directory contains language-independent source retrieval and matching tools, with language-specific inputs and outputs in folders such as `es/`, `fr/`, and `de/`.
+This directory contains language-independent source retrieval and matching tools, with language-specific inputs and outputs in folders such as `es/`, `fr/`, `de/`, and `el/`.
 
 ## What this repository does
 
@@ -33,6 +33,14 @@ Existing downloads are reused. Add `--force` to a download command to replace it
 python -m taxonomy_all download-shared
 python -m taxonomy_all download-wikidata es
 python -m taxonomy_all build es
+```
+
+### Example: Greek
+
+```sh
+python -m taxonomy_all download-shared
+python -m taxonomy_all download-wikidata el
+python -m taxonomy_all build el
 ```
 
 ### Example: French
