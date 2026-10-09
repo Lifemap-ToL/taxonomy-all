@@ -1,30 +1,27 @@
 {
   "language": "fr",
-  "source_records": 834970,
+  "source_records": 623030,
   "source_records_by_source": {
     "col_2026-08-26": 88314,
     "gbif_2023-08-28": 63781,
     "inat_2026-09-01": 69880,
-    "inpn_v11": 211940,
     "inpn_v18": 375322,
     "wikidata_2026-09-28": 25733
   },
-  "matched_source_records": 438903,
+  "matched_source_records": 358280,
   "matched_source_records_by_source": {
     "col_2026-08-26": 77227,
     "gbif_2023-08-28": 57616,
     "inat_2026-09-01": 61348,
-    "inpn_v11": 80623,
     "inpn_v18": 137989,
     "wikidata_2026-09-28": 24100
   },
-  "unique_taxid_name_pairs": 139968,
-  "unmatched_records": 397672,
+  "unique_taxid_name_pairs": 136932,
+  "unmatched_records": 266032,
   "unmatched_records_by_source": {
     "col_2026-08-26": 11247,
     "gbif_2023-08-28": 6185,
     "inat_2026-09-01": 8725,
-    "inpn_v11": 131640,
     "inpn_v18": 238191,
     "wikidata_2026-09-28": 1684
   },
