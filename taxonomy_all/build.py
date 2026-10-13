@@ -4,6 +4,7 @@ import csv
 import io
 import json
 import sys
+import unicodedata
 import xml.etree.ElementTree as ET
 import zipfile
 from collections import Counter, defaultdict
@@ -33,6 +34,12 @@ def _vernacular_key(value: str) -> str:
 def _capitalization_score(value: str) -> int:
     words = value.replace("-", " ").split()
     return sum(1 for word in words if word[0].isupper() and word[1:].islower())
+
+
+def _latin_only_name(value: str) -> bool:
+    """Treat accents as Latin; ignore spaces, digits, and punctuation."""
+    letters = [char for char in value if char.isalpha()]
+    return bool(letters) and all(unicodedata.name(char, "").startswith("LATIN ") for char in letters)
 
 
 def _header_map(fieldnames: list[str] | None) -> dict[str, str]:
@@ -553,6 +560,9 @@ def build_language(language: str) -> None:
                 chosen_score = score
                 final_sources[key] = sources
         final_names[key] = chosen_name
+
+    if code == "el":
+        final_names = {key: name for key, name in final_names.items() if not _latin_only_name(name)}
 
     with output_file.open("w", encoding="utf-8", newline="") as output:
         writer = csv.writer(output, delimiter="\t", lineterminator="\n")

@@ -4,12 +4,14 @@ The Greek pipeline uses the shared NCBI Taxonomy, GBIF Backbone, Catalogue of Li
 
 Source scientific names are matched against NCBI scientific names and synonyms. Wikidata can also provide a direct NCBI taxid. Unmatched source records are written to the local `unmatched.tsv` report.
 
+As the final step of the Greek build, vernacular names written entirely with Latin letters (including accented Latin letters) are removed. Names containing Greek letters remain, even when they also contain Latin letters. Spaces, digits, and punctuation do not affect this check.
+
 <!-- BEGIN AUTO-GENERATED BUILD SUMMARY -->
 ## Latest build summary (generated)
 
 Build command: `python -m taxonomy_all build el`.
 
-The build read **14 149 Greek-language source records** and wrote **8 594 unique NCBI taxid/vernacular-name pairs** to `TAXONOMIC-VERNACULAR-EL-LATEST.txt`.
+The build read **14 149 Greek-language source records** and wrote **7 507 unique NCBI taxid/vernacular-name pairs** to `TAXONOMIC-VERNACULAR-EL-LATEST.txt`.
 
 | Source snapshot | Input records | NCBI taxid links | Unmatched records |
 |---|---:|---:|---:|
